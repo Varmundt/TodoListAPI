@@ -14,7 +14,7 @@ API RESTful para gerenciamento de tarefas com autenticação JWT.
 
 1. Clone o repositório
 ```bash
-git clone https://github.com/seu-usuario/todo-api.git
+git clone https://github.com/Varmundt/TodoListAPI.git
 cd todo-api
 ```
 
