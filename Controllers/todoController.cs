@@ -41,32 +41,37 @@ public class TodoController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<TodoItemResponseDto>> GetById(int id)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         var task = await _context.TodoItems.FindAsync(id);
-            
-        if (task == null)
-        {
-            return NotFound();
-        }
         
+        if (task == null)
+            return NotFound(new { message = "Tarefa não encontrada" });
+        
+        if (task.UserId != userId)
+            return Forbid();
+    
         var response = new TodoItemResponseDto
         {
             Id = task.Id,
             TaskName = task.TaskName,
             IsDone = task.IsDone
         };
-            
+        
         return Ok(response);
     }
     
     [HttpPost]
     public async Task<ActionResult<TodoItemResponseDto>> Create([FromBody] TodoItemDto todoDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+    
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        
+    
         var todoItem = new TodoItem
         {
             TaskName = todoDto.TaskName,
-            IsDone = false,
+            IsDone = todoDto.IsDone,
             UserId = userId
         };
 
@@ -86,12 +91,17 @@ public class TodoController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] TodoItemDto todoDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+    
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         var task = await _context.TodoItems.FindAsync(id);
-            
+        
         if (task == null)
-        {
-            return NotFound();
-        }
+            return NotFound(new { message = "Tarefa não encontrada" });
+        
+        if (task.UserId != userId)
+            return Forbid();
 
         task.TaskName = todoDto.TaskName;
         task.IsDone = todoDto.IsDone;
@@ -104,12 +114,14 @@ public class TodoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         var task = await _context.TodoItems.FindAsync(id);
-            
+        
         if (task == null)
-        {
-            return NotFound();
-        }
+            return NotFound(new { message = "Tarefa não encontrada" });
+        
+        if (task.UserId != userId)
+            return Forbid();
 
         _context.TodoItems.Remove(task);
         await _context.SaveChangesAsync();

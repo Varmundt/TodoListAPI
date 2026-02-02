@@ -26,9 +26,15 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult> Register(RegisterDto dto)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-            return BadRequest("Email já cadastrado");
-
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
+        if (await _context.Users.AnyAsync(x => x.Email == dto.Email))
+            return BadRequest(new { message = "Email já cadastrado" });
+        
+        if (await _context.Users.AnyAsync(x => x.Username == dto.Username))
+            return BadRequest(new { message = "Usuário já cadastrado" });
+        
         var user = new User
         {
             Username = dto.Username,
@@ -40,23 +46,27 @@ public class AuthController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return Ok("Usuário registrado com sucesso");
+        return Ok(new { message = "Usuário registrado com sucesso" });
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+    
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        
+    
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-            return Unauthorized("Credenciais inválidas");
+            return Unauthorized(new { message = "Credenciais inválidas" });
 
         var token = GenerateJwtToken(user);
 
         return Ok(new AuthResponseDto
         {
             Token = token,
-            Username = user.Username
+            Username = user.Username,
+            Email = user.Email
         });
     }
 

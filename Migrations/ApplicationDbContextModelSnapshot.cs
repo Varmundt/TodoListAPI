@@ -35,8 +35,7 @@ namespace todoAPI.Migrations
 
                     b.Property<string>("TaskName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
