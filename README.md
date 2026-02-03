@@ -2,6 +2,9 @@
 
 API RESTful para gerenciamento de tarefas com autenticação JWT.
 
+Há um repositório FrontEnd para testar a API, Acesse o link abaixo para acessar ele:
+https://github.com/Varmundt/Todo-List-FrontEnd
+
 ## 🚀 Tecnologias
 
 - ASP.NET Core 8
